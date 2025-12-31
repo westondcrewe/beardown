@@ -17,6 +17,8 @@ final class WeekViewModel: ObservableObject {
 
     private let auth = GoogleAuthManager()
     private let repo = ScheduleRepository()
+    
+    func repository() -> ScheduleRepository { repo }
 
     func load() async {
         errorMessage = nil

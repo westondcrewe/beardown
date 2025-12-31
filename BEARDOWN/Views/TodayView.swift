@@ -15,20 +15,22 @@ struct TodayView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if !vm.authManager().isSignedIn {
-                    signInView
-                } else {
-                    todayContent
+            AppBackground(style: .today) {
+                Group {
+                    if !vm.authManager().isSignedIn {
+                        signInView
+                    } else {
+                        todayContent
+                    }
                 }
-            }
-            .navigationTitle("Today")
-            .task {
-                await vm.load()
-            }
-            .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
-                // Handles midnight/day changes
-                vm.refreshForToday()
+                .navigationTitle("Today")
+                .task {
+                    await vm.load()
+                }
+                .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in
+                    // Handles midnight/day changes
+                    vm.refreshForToday()
+                }
             }
         }
     }
@@ -76,19 +78,25 @@ struct TodayView: View {
 
                 ForEach(Array(vm.activities.enumerated()), id: \.element.id) { (idx, activity) in
                     let isCompleted = store.isCompleted(activityId: activity.id, on: date)
-                    let isEnabled = (firstIncompleteIndex == idx) && !isCompleted
+                    let firstIncompleteIndex = vm.activities.firstIndex(where: { !store.isCompleted(activityId: $0.id, on: date) })
+                    let isNextToDo = (firstIncompleteIndex == idx) && !isCompleted
+
+                    let themeColor = ActivityTheme.fromTitle(activity.title).color
 
                     NavigationLink {
-                        ActivityDetailView(activity: activity, detail: vm.repository().detail(for: activity))
+                        ActivityDetailView(
+                            activity: activity,
+                            detail: vm.repository().detail(for: activity),
+                            mode: .today(isNextToDo: isNextToDo, isCompleted: isCompleted)
+                        )
                     } label: {
                         ActivityCardView(
                             title: activity.title,
-                            slotIndex: idx, // color by visible order for the day
-                            isCompleted: isCompleted,
-                            isEnabled: isEnabled
+                            color: themeColor,
+                            isCompleted: isCompleted
                         )
                     }
-                    .disabled(!isEnabled)
+                    .tint(.clear)
                 }
 
                 if vm.activities.isEmpty && !vm.isLoading {
