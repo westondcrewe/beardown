@@ -30,3 +30,10 @@ enum Weekday: Int, CaseIterable, Identifiable {
         return Weekday(rawValue: wd) ?? .monday
     }
 }
+
+extension Array where Element == Weekday {
+    func rotatedStarting(at start: Weekday) -> [Weekday] {
+        guard let idx = firstIndex(of: start) else { return self }
+        return Array(self[idx...]) + Array(self[..<idx])
+    }
+}

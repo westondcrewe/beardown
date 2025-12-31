@@ -158,4 +158,20 @@ enum SheetsParsers {
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
     }
+    static func parseTimedSteps(_ rows: [[String]], defaultSeconds: Int = 30) -> [TimedStep] {
+            var steps: [TimedStep] = []
+
+            for row in rows {
+                // Find a name: first non-empty cell
+                let name = row.first(where: { !$0.trimmed.isEmpty })?.trimmed
+                guard let name, !name.isEmpty else { continue }
+
+                // Find seconds: first cell that parses as Int
+                let seconds = row.compactMap { Int($0.trimmed) }.first ?? defaultSeconds
+
+                steps.append(TimedStep(name: name, seconds: seconds))
+            }
+
+            return steps
+        }
 }

@@ -7,15 +7,19 @@
 
 import Foundation
 
+struct TimedStep: Hashable {
+    let name: String
+    let seconds: Int
+}
+
 enum ActivityDetailKind: Hashable {
     case list
-    case timedIntervals(secondsPerItem: Int)
+    case timed(steps: [TimedStep])
 }
 
 struct ActivityDetail: Hashable {
     let title: String
     let durationMinutes: Int?
-    let items: [String]
+    let items: [String]          // used for list-style workouts
     let kind: ActivityDetailKind
 }
-

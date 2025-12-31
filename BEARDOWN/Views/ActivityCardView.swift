@@ -9,42 +9,36 @@ import SwiftUI
 
 struct ActivityCardView: View {
     let title: String
-    let slotIndex: Int
+    let color: Color
     let isCompleted: Bool
-    let isEnabled: Bool
 
     var body: some View {
-        let color = ActivitySlot(index: min(slotIndex, 3)).color
-
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 6) {
                 Text(title)
                     .font(.headline)
-                    .foregroundStyle(.primary)
+                    .foregroundColor(.black)
 
-                Text(isCompleted ? "Completed" : (isEnabled ? "Tap to start" : "Locked"))
+                Text(isCompleted ? "Completed" : "Tap to view")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundColor(.black.opacity(0.65))
             }
 
             Spacer()
 
-            if isCompleted {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.title3)
-            } else if !isEnabled {
-                Image(systemName: "lock.fill")
-                    .font(.title3)
-            } else {
-                Image(systemName: "chevron.right")
-                    .font(.title3)
-            }
+            Image(systemName: isCompleted ? "checkmark.circle.fill" : "chevron.right")
+                .foregroundColor(.black)
+                .font(.title3)
         }
         .padding()
-        .background(color.opacity(0.22), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(color.opacity(0.22))
+        )
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .stroke(color.opacity(0.35), lineWidth: 1)
         )
     }
 }
+

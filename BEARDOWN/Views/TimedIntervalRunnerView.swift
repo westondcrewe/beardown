@@ -11,8 +11,7 @@ import AVFoundation
 
 struct TimedIntervalRunnerView: View {
     let title: String
-    let items: [String]
-    let secondsPerItem: Int
+    let steps: [TimedStep]
     let onFinished: () -> Void
 
     @State private var index: Int = 0
@@ -28,7 +27,7 @@ struct TimedIntervalRunnerView: View {
                 .font(.title2).bold()
                 .padding(.top, 8)
 
-            if items.isEmpty {
+            if steps.isEmpty {
                 Text("No exercises found.")
                     .foregroundStyle(.secondary)
                 Spacer()
@@ -38,10 +37,10 @@ struct TimedIntervalRunnerView: View {
         }
         .padding()
         .onAppear {
-            secondsRemaining = secondsPerItem
+            secondsRemaining = steps.first?.seconds ?? 0
         }
         .onReceive(timer) { _ in
-            guard hasStarted, !isFinished, !items.isEmpty else { return }
+            guard hasStarted, !isFinished, !steps.isEmpty else { return }
             tick()
         }
     }
@@ -49,10 +48,10 @@ struct TimedIntervalRunnerView: View {
     private var workoutContent: some View {
         VStack(spacing: 16) {
             VStack(spacing: 10) {
-                Text("Move \(index + 1) of \(items.count)")
+                Text("Move \(index + 1) of \(steps.count)")
                     .foregroundStyle(.secondary)
 
-                Text(items[index])
+                Text(steps[index].name)
                     .font(.title)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
@@ -73,39 +72,30 @@ struct TimedIntervalRunnerView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .disabled(hasStarted || items.isEmpty)
+            .disabled(hasStarted || steps.isEmpty)
 
             Spacer()
         }
     }
 
     private func start() {
-        guard !items.isEmpty else { return }
         hasStarted = true
-        isFinished = false
         index = 0
-        secondsRemaining = secondsPerItem
+        secondsRemaining = steps[0].seconds
     }
 
     private func tick() {
-        if secondsRemaining > 1 {
-            secondsRemaining -= 1
-            return
-        }
+        if secondsRemaining > 1 { secondsRemaining -= 1; return }
 
         playChime()
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
 
-        if index < items.count - 1 {
+        if index < steps.count - 1 {
             index += 1
-            secondsRemaining = secondsPerItem
+            secondsRemaining = steps[index].seconds
         } else {
             isFinished = true
             secondsRemaining = 0
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                onFinished()
-            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { onFinished() }
         }
     }
 

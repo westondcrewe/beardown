@@ -42,6 +42,6 @@ final class TodayViewModel: ObservableObject {
 
     func refreshForToday() {
         todayWeekday = .today()
-        activities = repo.activities(for: todayWeekday)
+        activities = repo.activities(for: Weekday.today())
     }
 }
